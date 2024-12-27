@@ -6,4 +6,4 @@ on:
 
 jobs:
   build:
-    uses: ./workflow-templates/docker-build.yml
+    uses: BerkeleyLibrary/.github/workflows/docker-build.yml@main

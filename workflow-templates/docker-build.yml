@@ -99,4 +99,4 @@ jobs:
   test:
     needs: build
     if: github.event_name != 'release'
-    uses: ./workflow-templates/docker-test.yml
+    uses: BerkeleyLibrary/.github/workflows/docker-test.yml@main
