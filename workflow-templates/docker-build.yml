@@ -83,7 +83,6 @@ jobs:
             GIT_REF_NAME=${{ github.ref_name }}
             GIT_REPOSITORY_URL=${{ github.repositoryUrl }}
             GIT_SHA=${{ github.sha }}
-          platforms: linux/amd64,linux/arm64
           push: true
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
