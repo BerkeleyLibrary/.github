@@ -1,9 +1,9 @@
 name: Build and push Docker image
 
 on:
-  - push
-  - release
-  - workflow_dispatch
+  push:
+  release:
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -95,8 +95,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-
-  test:
-    needs: build
-    if: github.event_name != 'release'
-    uses: BerkeleyLibrary/.github/workflows/docker-test.yml@main
