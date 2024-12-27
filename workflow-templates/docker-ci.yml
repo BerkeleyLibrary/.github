@@ -31,8 +31,8 @@ jobs:
 
   build:
     needs: prereqs
-    uses: BerkeleyLibrary/.github/workflows/docker-build.yml@main
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
 
   test:
     needs: build
-    uses: BerkeleyLibrary/.github/workflows/docker-test.yml@main
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-test.yml@main
