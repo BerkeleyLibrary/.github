@@ -1,0 +1,12 @@
+{
+  "name": "Berkeley Library CI",
+  "description": "Builds, pushes, and tests applications using docker/compose",
+  "iconName": "log",
+  "categories": [
+      "continuous-integration"
+  ],
+  "filePatterns": [
+    "^Dockerfile",
+    "^docker-compose.ci.yml"
+  ]
+}

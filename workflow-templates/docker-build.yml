@@ -1,0 +1,103 @@
+name: Build and push Docker image
+
+on:
+  - push
+  - release
+  - workflow_dispatch
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    outputs:
+      build_url: ${{ steps.data.outputs.build_url }}
+
+    steps:
+      - name: Debug environment variables
+        run: env | sort
+
+      - id: data
+        name: Populates outputs
+        run: |
+          echo "build_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: setup
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        name: Construct image tags and labels
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          labels: |
+            edu.berkeley.lib.build-timestamp=${{ github.event.repository.updated_at }}
+            edu.berkeley.lib.build-url=${{ needs.setup.outputs.build_url }}
+            edu.berkeley.lib.git-ref-name=${{ github.ref_name }}
+            edu.berkeley.lib.git-repository-url=${{ github.repositoryUrl }}
+            edu.berkeley.lib.git-sha=${{ github.sha }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+
+      - id: push
+        name: Build and push docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          build-args: |
+            BUILD_TIMESTAMP=${{ github.event.repository.updated_at }}
+            BUILD_URL=${{ needs.setup.outputs.build_url }}
+            GIT_REF_NAME=${{ github.ref_name }}
+            GIT_REPOSITORY_URL=${{ github.repositoryUrl }}
+            GIT_SHA=${{ github.sha }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+  test:
+    needs: build
+    if: github.event_name != 'release'
+    uses: ./workflow-templates/docker-test.yml

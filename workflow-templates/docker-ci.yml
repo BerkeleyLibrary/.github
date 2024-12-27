@@ -1,0 +1,9 @@
+name: Docker CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./workflow-templates/docker-build.yml
