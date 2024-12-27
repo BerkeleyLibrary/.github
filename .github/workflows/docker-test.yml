@@ -34,7 +34,7 @@ jobs:
       - name: Prepare the stack
         run: |
           mkdir -p tmp/artifacts
-          docker compose up --build --pull=always --wait
+          docker compose up --build --pull=always --quiet-pull --wait
           docker compose exec app setup
 
       - name: Run the test suite
