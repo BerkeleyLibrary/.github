@@ -1,7 +1,7 @@
 {
   "name": "Berkeley Library CI",
   "description": "Builds, pushes, and tests applications using docker/compose",
-  "iconName": "log",
+  "iconName": "octicon log",
   "categories": [
       "continuous-integration"
   ],
