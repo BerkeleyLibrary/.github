@@ -2,7 +2,6 @@ name: Test the stack using docker compose
 
 on:
   workflow_call:
-  workflow_dispatch:
 
 env:
   COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
