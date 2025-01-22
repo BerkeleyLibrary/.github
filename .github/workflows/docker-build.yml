@@ -63,6 +63,7 @@ jobs:
             edu.berkeley.lib.git-repository-url=${{ github.repositoryUrl }}
             edu.berkeley.lib.git-sha=${{ github.sha }}
           tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
             type=sha
             type=ref,event=branch
             type=ref,event=pr
