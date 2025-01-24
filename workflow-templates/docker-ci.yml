@@ -6,31 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  prereqs:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Check for required files
-        run: |
-          errors=0
-
-          required_files=(bin/setup bin/test docker-compose.yml docker-compose.ci.yml)
-          for file in "${required_files[@]}"; do
-            if [ -f "$file" ]; then
-              echo "$file found"
-            else
-              echo "$file not found"
-              errors=$((errors + 1))
-            fi
-          done
-
-          exit $errors
-
   build:
-    needs: prereqs
     uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
 
   test:
