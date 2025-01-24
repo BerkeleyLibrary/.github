@@ -16,10 +16,14 @@ jobs:
 
     steps:
       - name: Set the DOCKER_APP_IMAGE environment variable
-        run: echo "DOCKER_APP_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
+        shell: bash
+        run: |
+          echo "ARTIFACT_ID=${GITHUB_REPOSITORY/\//-}-sha-${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
+          echo "DOCKER_APP_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
 
       - name: Dump the environment
-        run: env | sort
+        run: |
+          env | sort
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,23 +36,23 @@ jobs:
 
       - name: Prepare the stack
         run: |
-          mkdir -p tmp/artifacts
           docker compose up --build --pull=always --quiet-pull --wait
+          docker compose exec -u root app chmod 0777 artifacts
           docker compose exec app setup
 
       - name: Run the test suite
-        shell: bash
         run: |
-          docker compose exec app test | tee tmp/artifacts/test-results.html
+          docker compose exec app test
 
-      - name: Write service and event logs
+      - name: Write docker service logs to a file
         if: ${{ always() }}
         run: |
-          docker compose logs > tmp/artifacts/docker-services.log
+          docker compose cp app:/opt/app/artifacts artifacts
+          docker compose logs > artifacts/docker-services.log
 
       - name: Archive test results and logs
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: Test Summary
-          path: tmp/artifacts
+          name: ${{ env.ARTIFACT_ID }}-artifacts
+          path: artifacts
