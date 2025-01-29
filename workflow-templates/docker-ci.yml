@@ -7,8 +7,8 @@ on:
 
 jobs:
   build:
-    uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@v1.1.0
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
 
   test:
     needs: build
-    uses: BerkeleyLibrary/.github/.github/workflows/docker-test.yml@v1.1.0
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-test.yml@main
