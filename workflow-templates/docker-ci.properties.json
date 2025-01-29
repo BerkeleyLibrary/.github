@@ -1,12 +1,15 @@
 {
-  "name": "Berkeley Library CI",
-  "description": "Builds, pushes, and tests applications using docker/compose",
+  "name": "Docker CI",
+  "description": "Builds, pushes, and tests applications using docker compose",
   "iconName": "octicon log",
   "categories": [
       "continuous-integration"
   ],
   "filePatterns": [
     "^Dockerfile",
-    "^docker-compose.ci.yml"
+    "^docker-compose.yml",
+    "^docker-compose.ci.yml",
+    "setup",
+    "test"
   ]
 }
