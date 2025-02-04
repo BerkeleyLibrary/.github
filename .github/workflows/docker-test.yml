@@ -37,7 +37,7 @@ jobs:
       - name: Prepare the stack
         run: |
           docker compose up --build --pull=always --quiet-pull --wait
-          docker compose exec -u root app chmod 0777 artifacts
+          docker compose exec -u root app chmod 0777 /opt/app/artifacts
           docker compose exec app setup
 
       - name: Run the test suite
