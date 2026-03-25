@@ -2,13 +2,52 @@ name: Docker CI
 
 on:
   push:
-  release:
+    branches:
+      - '**'
   workflow_dispatch:
 
 jobs:
   build:
     uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
+    with:
+      image: ghcr.io/${{ github.repository }}
+    secrets: inherit
 
+  # Customize this job as needed
   test:
     needs: build
-    uses: BerkeleyLibrary/.github/.github/workflows/docker-test.yml@main
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: compose.yml:compose.ci.yml
+      DOCKER_APP_IMAGE: ${{ needs.build.outputs.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@main
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup the stack
+        run: |
+          docker compose pull --quiet
+          docker compose up --wait
+
+      - name: Run the tests
+        run: |
+          docker compose exec app test
+
+  push:
+    needs: [build, test]
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-push.yml@main
+    with:
+      image: ghcr.io/${{ github.repository }}
+      build-image-arm64: ${{ needs.build.outputs.image-arm64 }}
+      build-image-x64: ${{ needs.build.outputs.image-x64 }}
+    secrets: inherit
