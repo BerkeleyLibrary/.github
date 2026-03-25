@@ -1,6 +1,6 @@
 {
   "name": "Docker CI",
-  "description": "Builds, pushes, and tests applications using docker compose",
+  "description": "Build, test, and push multi-arch (ARM64/X64) Docker images",
   "iconName": "octicon log",
   "categories": [
       "continuous-integration"
@@ -8,8 +8,6 @@
   "filePatterns": [
     "^Dockerfile",
     "^docker-compose.yml",
-    "^docker-compose.ci.yml",
-    "setup",
-    "test"
+    "^docker-compose.ci.yml"
   ]
 }

@@ -1,0 +1,46 @@
+name: Docker Push
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      build-image-arm64:
+        required: true
+        type: string
+      build-image-x64:
+        required: true
+        type: string
+
+env:
+  DOCKER_METADATA_SET_OUTPUT_ENV: 'true'
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Produce permanent image tags
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.image }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Retag and push the image
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("--tag " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            "${{ inputs.build-image-arm64 }}" "${{ inputs.build-image-x64 }}"
