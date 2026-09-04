@@ -35,11 +35,11 @@ The release pipeline runs on git tags. It finds the existing `sha-*` image
 
 ---
 
-> **Semver Suffixes:** The `docker/metadata-action@v5` `semver` tag type does not handle
-> version suffixes (e.g. prerelease tags like `v1.2.3-rc.1`). The release
-> workflow uses custom `match` regexes instead, ensuring that even suffixed
-> versions are recognized and tagged at the major, minor, patch, and full tag
-> levels.
+> **Semver Suffixes:** For prerelease tags (e.g. `v1.2.3-rc.1`),
+> `docker/metadata-action@v6`'s `semver` tag type deliberately emits only the
+> full prerelease version; it does not generate major, minor, or patch tags.
+> The release workflow uses custom `match` regexes to generate those tags as
+> well as the full tag.
 
 ---
 

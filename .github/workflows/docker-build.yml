@@ -37,13 +37,13 @@ jobs:
             runner: ubuntu-24.04-arm
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -51,14 +51,14 @@ jobs:
 
       - id: build-meta
         name: Prepare Docker metadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ inputs.image }}
           tags: type=sha,suffix=${{ env.BUILD_SUFFIX }}
 
       - id: cache-meta
         name: Fetch build cache metadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ inputs.image }}
           tags: type=raw,value=buildcache-${{ runner.arch }}
@@ -70,7 +70,7 @@ jobs:
 
       - id: build
         name: Build/push the arch-specific image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           platforms: ${{ matrix.platform }}
           cache-from: type=registry,ref=${{ steps.cache-meta.outputs.tags }}
@@ -93,10 +93,10 @@ jobs:
       image: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -104,7 +104,7 @@ jobs:
 
       - id: meta
         name: Generate tag for the app image
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         env:
           DOCKER_METADATA_SET_OUTPUT_ENV: 'true'
         with:
