@@ -11,7 +11,6 @@ jobs:
     uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
     with:
       image: ghcr.io/${{ github.repository }}
-    secrets: inherit
 
   # Customize this job as needed
   test:
@@ -50,4 +49,3 @@ jobs:
       image: ghcr.io/${{ github.repository }}
       build-image-arm64: ${{ needs.build.outputs.image-arm64 }}
       build-image-x64: ${{ needs.build.outputs.image-x64 }}
-    secrets: inherit
