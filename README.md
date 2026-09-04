@@ -14,15 +14,42 @@ The CI pipeline builds, tests, and pushes images on every branch push. The
 how to weave together the shared build and push workflows with a custom test
 job.
 
-| Workflow | Inputs | Outputs | Purpose |
-|----------|--------|---------|---------|
-| [`docker-build`](.github/workflows/docker-build.yml) | `image` | `image`, `image-arm64`, `image-x64` | Build on native ARM64 + x64 runners, merge into a multi-platform manifest with a temporary build tag |
-| [`docker-push`](.github/workflows/docker-push.yml) | `image`, `build-image-arm64`, `build-image-x64` | — | Retag the build digests with permanent tags (`sha-*`, branch name, `latest` on default branch) |
+| Workflow | Inputs | Secrets | Outputs | Purpose |
+|----------|--------|---------|---------|---------|
+| [`docker-build`](.github/workflows/docker-build.yml) | `image` | `registry-auth` (optional) | `image`, `image-arm64`, `image-x64` | Build on native ARM64 + x64 runners, merge into a multi-platform manifest with a temporary build tag |
+| [`docker-push`](.github/workflows/docker-push.yml) | `image`, `build-image-arm64`, `build-image-x64` | — | — | Retag the build digests with permanent tags (`sha-*`, branch name, `latest` on default branch) |
 
 The **test** job is defined by the calling repo (not a shared workflow) so each
 project can customize its test setup. The `docker-ci` template provides a
 starting point that pulls the built image via `docker compose` and runs a `test`
 command in the app container.
+
+#### Private base images
+
+`docker-build` always authenticates to GHCR with the calling workflow's
+`GITHUB_TOKEN`. To pull private base images, pass any additional credentials as
+YAML through the optional `registry-auth` secret:
+
+```yaml
+jobs:
+  build:
+    uses: BerkeleyLibrary/.github/.github/workflows/docker-build.yml@main
+    with:
+      image: ghcr.io/${{ github.repository }}
+    secrets:
+      registry-auth: |
+        - registry: ghcr.io
+          username: ${{ secrets.PRIVATE_REGISTRY_USERNAME || github.actor }}
+          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+          scope: someorg/private/reg@pull
+```
+
+`registry-auth` accepts any number of entries. Each entry supports the
+`registry`, `username`, `password`, `scope`, and `ecr` fields from
+[`docker/login-action`](https://github.com/docker/login-action#customizing).
+Use a `scope` ending in `@pull` when the credential only needs to pull a private
+base image. Unscoped credentials are available to all Docker commands in the
+build job; scoped credentials are available only to Buildx.
 
 ### Release Pipeline
 
@@ -66,7 +93,6 @@ jobs:
     uses: BerkeleyLibrary/.github/.github/workflows/docker-release.yml@main
     with:
       image: ghcr.io/${{ github.repository }}
-    secrets: inherit
 ```
 
 ### Full Lifecycle
@@ -107,4 +133,7 @@ flowchart LR
 - A `Dockerfile` at the repo root
 - A `compose.yml` and `compose.ci.yml` for testing (if using the compose-based test pattern)
 - `packages: write` permission on the calling workflow
-- `secrets: inherit` on each reusable workflow call
+
+The reusable workflows receive the caller's `GITHUB_TOKEN` automatically, so
+callers do not need `secrets: inherit`. Pass only the optional `registry-auth`
+secret when the build requires additional registry credentials.
