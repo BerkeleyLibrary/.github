@@ -45,11 +45,9 @@ jobs:
           flavor: latest=false
           tags: |
             type=ref,event=tag
-            type=match,pattern=v?(\d+),group=1
-            type=match,pattern=v?(\d+\.\d+),group=1
-            type=match,pattern=v?(\d+\.\d+\.\d+),group=1
-            type=match,pattern=v?(\d+\.\d+\.\d+-.*),group=1
-            type=match,pattern=.*
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}}
 
       - name: Retag and push image
         env:
