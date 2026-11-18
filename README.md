@@ -2,6 +2,22 @@
 
 Shared workflows for Berkeley Library GitHub repositories.
 
+## Releasing Shared Workflows
+
+In a nutshell, use semver for releases of this repo itself. It's a bare workflows repo, so you have to manage updates to tracked tags yourself. After deciding on a new, unique tag, update tracked tags accordingly as in the following example:
+
+```sh
+commit="some-sha"
+git tag -s 3.2.2 "$commit" -m "3.2.2: Brief description of this release"
+git tag -fs 3.2 '3.2.2^{}' -m "Track the latest 3.2 release"
+git tag -fs 3 '3.2.2^{}'   -m "Track the latest 3 release"
+git push --force --tags
+```
+
+Then go into GitHub and make a release based off the new tag.
+
+Note: The "^{}" dereferences the target tag to its underlying SHA, so the derivative tag points to the underlying commit rather than the tag itself.
+
 ## Docker Workflows
 
 Reusable `workflow_call` workflows for multi-arch (ARM64/x64) Docker image
