@@ -55,4 +55,4 @@ jobs:
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map("--tag " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            "$(echo "$BASE_IMAGE" | cut -f1 -d:)"
+            "$BASE_IMAGE"
